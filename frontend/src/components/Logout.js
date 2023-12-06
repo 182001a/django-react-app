@@ -12,9 +12,13 @@ const LogoutComponent = ({ cookies }) => {
   };
 
   return (
-    <div>
-      <h2>ログアウトしますか？</h2>
-      <button onClick={handleLogout}>ログアウト</button>
+    <div className="container">
+      <div className="auth-form">
+        <div className="auth-form__item">
+          <label className="auth-form__label">ログアウトしますか？</label>
+        </div>
+        <button className="btn auth-form__btn" onClick={handleLogout}>ログアウト</button>
+      </div>
     </div>
   );
 };

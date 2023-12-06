@@ -2,21 +2,28 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { withCookies } from 'react-cookie';
 import { useNavigate } from 'react-router-dom';
+import { useAppContext } from "../AppContext";
 
 const LoginComponent = ({ cookies }) => {
+  const navigate = useNavigate();
+  const LOGIN_URL = 'http://localhost:8000/login/'
+  
   const [credentials, setCredentials] = useState({
     username: '',
     password: '',
     email: ''
   });
 
-  const navigate = useNavigate();
+
+  const [error, setError] = useState(false);
+
+  const { setUser } = useAppContext();
 
   useEffect(() => {
     // ログイン状態をチェックする
     const authToken = cookies.get('authToken');
     if (authToken) {
-      navigate('/'); // ログイン済みの場合はホームページにリダイレクト
+      navigate('/');
     }
   }, [navigate, cookies]); // navigateまたはcookiesが変わる度に効果が再実行される
 
@@ -27,52 +34,56 @@ const LoginComponent = ({ cookies }) => {
   const handleSubmit = async (e) => {
     e.preventDefault(); // フォームのデフォルトの送信動作を防ぐ
     try {
-      const response = await axios.post('http://127.0.0.1:8000/login/', credentials, {
+      const response = await axios.post(LOGIN_URL, credentials, {
         headers: { 'Content-Type': 'application/json' }
       });
-      cookies.set('authToken', response.data.token); // Cookieに認証トークンを保存
-      alert('ログイン成功');
-      navigate('/'); // ログイン成功後にホームページにリダイレクト
+      cookies.set('authToken', response.data.token);
+      setUser({ username: credentials.username})
+      navigate('/');
     } catch (error) {
-      console.error('ログインエラー', error);
-      alert('ログイン失敗');
+      setError(true);
     }
   };
 
   return (
     <div className="container">
-      <form className="login" onSubmit={handleSubmit}>
-        <div className="login__item">
-          <label className="login__label">ユーザー名</label>
+      { error && 
+      <div className="message">
+        <p className="message__error">ログイン失敗</p>
+      </div>
+      }
+      <form className="auth-form" onSubmit={handleSubmit}>
+        <div className="auth-form__item">
+          <label className="auth-form__label">ユーザー名</label>
           <input
-            className="login__input"
+            className="auth-form__input"
             type="text"
             name="username"
             value={credentials.username}
             onChange={handleChange}
           />
         </div>
-        <div className="login__item">
-          <label className="login__label">パスワード</label>
+        <div className="auth-form__item">
+          <label className="auth-form__label">パスワード</label>
           <input
-            className="login__input"
+            className="auth-form__input"
             type="password"
             name="password"
             value={credentials.password}
             onChange={handleChange}
           />
         </div>
-        <div className="login__item">
-          <label className="login__label">メール</label>
+        <div className="auth-form__item">
+          <label className="auth-form__label">メールアドレス</label>
           <input
-            className="login__input"
+            className="auth-form__input"
             type="email"
             name="email"
             value={credentials.email}
             onChange={handleChange}
           />
         </div>
-        <button className="btn login__btn" type="submit">ログイン</button>
+        <button className="btn auth-form__btn" type="submit">ログイン</button>
       </form>
     </div>
   );

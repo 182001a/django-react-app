@@ -6,7 +6,6 @@ import './style.scss';
 
 const Navbar = ({ cookies }) => { // 末尾の ~ withCookies(Navbar)によりcookiesプロップスを受け取る
   const authToken = cookies.get('authToken');
-
   return (
     <nav className="nav">
     {authToken ? (

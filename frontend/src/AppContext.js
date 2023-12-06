@@ -8,16 +8,13 @@ export function useAppContext() {
 
 export function AppProvider({ children }) {
   const [user, setUser] = useState(null);
-  const [channels, setChannels] = useState([]);
-  const [currentChannel, setCurrentChannel] = useState(null);
+  const [posts, setPosts] = useState([]);
 
   const value = {
     user,
     setUser,
-    channels,
-    setChannels,
-    currentChannel,
-    setCurrentChannel
+    posts,
+    setPosts,
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

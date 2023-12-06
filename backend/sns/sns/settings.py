@@ -26,9 +26,6 @@ SECRET_KEY = 'l$q%^vn4c8-#5%#^72im%gnqe+4r01nwx3u!(*e=r-a-i+$0d1'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
-
-
 # Application definition
 
 INSTALLED_APPS = [
@@ -54,11 +51,23 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.SessionAuthentication',
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ]
+}
+
+# セキュリティ関連の設定
+# 本番環境ではこれらを適切に設定してください
+CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = True
+
 CORS_ORIGIN_WHITELIST = [
     'http://localhost:3000',  # Reactアプリケーションのオリジン
 ]
-
-CORS_ALLOW_CREDENTIALS = True
 
 ROOT_URLCONF = 'sns.urls'
 
@@ -78,27 +87,9 @@ TEMPLATES = [
     },
 ]
 
-REST_FRAMEWORK = {
-    # セッションベースの認証で　Cookieを使用
-    'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework.authentication.SessionAuthentication',
-    ),
-    # 認証されたユーザーのみがアクセスできる
-    'DEFAULT_PERMISSION_CLASSES': (
-        'rest_framework.permissions.IsAuthenticated',
-    ),
-}
-
-CSRF_COKKIE_SECURE = True           # CSRFトークンを含むCookieはHTTPS経由のみ
-SESSION_COOKIE_SECURE = True        # セッションCookieもHTTPS経由のみ
-SESSION_COOKIE_HTTPONLY = True      # javascriptからセッションCookieへのアクセス制限
-
-SECURE_BROWSER_XSS_FILTER = True    # xssフィルタを有効(悪意のあるスクリプトをブロック)
-SECURE_CONTENT_TYPE_NOSNIFF = True  # よくわからん
-X_FRAME_OPTIONS = 'DENY'            # これも
+SESSION_ENGINE = "django.contrib.sessions.backends.db"
 
 WSGI_APPLICATION = 'sns.wsgi.application'
-
 
 # Database
 # https://docs.djangoproject.com/en/3.1/ref/settings/#databases
