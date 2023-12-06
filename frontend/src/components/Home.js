@@ -17,7 +17,7 @@ function Home({ cookies }) {
       const authToken = cookies.get('authToken');
       if (authToken) {
         try {
-          const response = await axios.get(POST_URL, authToken, {
+          const response = await axios.get(POST_URL, {
             headers: { Authorization: `Token ${authToken}` }
           });
           setPosts(response.data);

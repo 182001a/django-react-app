@@ -38,6 +38,7 @@ const LoginComponent = ({ cookies }) => {
         headers: { 'Content-Type': 'application/json' }
       });
       cookies.set('authToken', response.data.token);
+      console.log(response);
       setUser({ username: credentials.username})
       navigate('/');
     } catch (error) {
