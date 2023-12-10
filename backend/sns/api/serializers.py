@@ -16,6 +16,7 @@ class UserSerializer(serializers.ModelSerializer):
 
 class PostSerializer(serializers.ModelSerializer):
     author = UserSerializer(read_only=True)
+    # created_at = serializers.DateTimeField(format='%Y/%m/%d, %H:%M:%S')
 
     class Meta:
         model = Post
@@ -23,9 +24,22 @@ class PostSerializer(serializers.ModelSerializer):
 
 
 class LikeSerializer(serializers.ModelSerializer):
+    post_detail = PostSerializer(source='post', read_only=True)
+    user = serializers.PrimaryKeyRelatedField(read_only=True)
+
     class Meta:
         model = Like
-        fields = ['id', 'user', 'post']
+        fields = ['id', 'user', 'post', 'post_detail']
+
+    def create(self, validated_data):
+        user = self.context['request'].user
+        like = Like.objects.create(user=user, **validated_data)
+        return like
+
+    def update(self, instance, validated_data):
+        instance.post = validated_data.get('post', instance.post)
+        instance.save()
+        return instance
 
 
 class FollowSerializer(serializers.ModelSerializer):

@@ -46,7 +46,7 @@ class LogoutView(generics.GenericAPIView):
 
 class CurrentUserView(generics.ListAPIView):
     serializer_class = serializers.UserSerializer
-    permission_classes = [permissions.AllowAny]
+    permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
         # 現在ログインしているユーザーのみを返す
@@ -56,7 +56,7 @@ class CurrentUserView(generics.ListAPIView):
 class PostViewSet(viewsets.ModelViewSet):
     queryset = models.Post.objects.all()
     serializer_class = serializers.PostSerializer
-    permission_classes = [permissions.AllowAny]
+    permission_classes = [permissions.IsAuthenticated]
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
@@ -65,19 +65,24 @@ class PostViewSet(viewsets.ModelViewSet):
 class LikeViewSet(viewsets.ModelViewSet):
     queryset = models.Like.objects.all()
     serializer_class = serializers.LikeSerializer
-    permission_classes = [permissions.AllowAny]
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        # 現在のユーザーがいいねした投稿のみを返す
+        user = self.request.user
+        return models.Like.objects.filter(user=user)
 
 
 class FollowViewSet(viewsets.ModelViewSet):
     queryset = models.Follow.objects.all()
     serializer_class = serializers.FollowSerializer
-    permission_classes = [permissions.AllowAny]
+    permission_classes = [permissions.IsAuthenticated]
 
 
 class MessageViewSet(viewsets.ModelViewSet):
     queryset = models.Message.objects.all()
     serializer_class = serializers.MessageSerializer
-    permission_classes = [permissions.AllowAny]
+    permission_classes = [permissions.IsAuthenticated]
 
     def perform_create(self, serializer):
         post_id = self.request.data.get('post')
