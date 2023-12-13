@@ -1,16 +1,17 @@
 from rest_framework import serializers
-from .models import Post, Like, Follow, Message
 from django.contrib.auth.models import User
+
+from . import models
 
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
-        model = User
+        model = models.CustomUser
         fields = ['id', 'username', 'password', 'email']
         extra_kwargs = {'password': {'write_only': True}}
 
     def create(self, validated_data):
-        user = User.objects.create_user(**validated_data)
+        user = models.CustomUser.objects.create_user(**validated_data)  # ここも変更
         return user
 
 
@@ -19,7 +20,7 @@ class PostSerializer(serializers.ModelSerializer):
     # created_at = serializers.DateTimeField(format='%Y/%m/%d, %H:%M:%S')
 
     class Meta:
-        model = Post
+        model = models.Post
         fields = ['id', 'author', 'content', 'file', 'created_at']
 
 
@@ -28,12 +29,12 @@ class LikeSerializer(serializers.ModelSerializer):
     user = serializers.PrimaryKeyRelatedField(read_only=True)
 
     class Meta:
-        model = Like
+        model = models.Like
         fields = ['id', 'user', 'post', 'post_detail']
 
     def create(self, validated_data):
         user = self.context['request'].user
-        like = Like.objects.create(user=user, **validated_data)
+        like = models.Like.objects.create(user=user, **validated_data)
         return like
 
     def update(self, instance, validated_data):
@@ -44,8 +45,9 @@ class LikeSerializer(serializers.ModelSerializer):
 
 class FollowSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Follow
+        model = models.Follow
         fields = ['id', 'follower', 'followed']
+        read_only_fields = ('follower',)
 
 
 class MessageSerializer(serializers.ModelSerializer):
@@ -53,6 +55,6 @@ class MessageSerializer(serializers.ModelSerializer):
     recipient = UserSerializer(read_only=True)
 
     class Meta:
-        model = Message
+        model = models.Message
         fields = ['id', 'sender', 'recipient',
                   'post', 'content', 'file', 'created_at']

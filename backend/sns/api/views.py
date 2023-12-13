@@ -2,13 +2,13 @@ from rest_framework import viewsets, status, generics, response, permissions
 from django.contrib.auth import authenticate, login, logout
 from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
-from django.contrib.auth.models import User
 
 from . import models, serializers
 
 
 class CreateUserView(generics.CreateAPIView):
     serializer_class = serializers.UserSerializer
+    permission_classes = [permissions.AllowAny]
 
 
 class LoginView(generics.GenericAPIView):
@@ -19,8 +19,8 @@ class LoginView(generics.GenericAPIView):
         email = request.data.get('email')
         password = request.data.get('password')
         try:
-            username = User.objects.get(email=email).username
-        except User.DoesNotExist:
+            username = models.CustomUser.objects.get(email=email).username
+        except models.CustomUser.DoesNotExist:
             return Response({'message': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
 
         user = authenticate(request, username=username, password=password)
@@ -50,7 +50,7 @@ class CurrentUserView(generics.ListAPIView):
 
     def get_queryset(self):
         # 現在ログインしているユーザーのみを返す
-        return User.objects.filter(id=self.request.user.id)
+        return models.CustomUser.objects.filter(id=self.request.user.id)
 
 
 class PostViewSet(viewsets.ModelViewSet):
@@ -77,6 +77,9 @@ class FollowViewSet(viewsets.ModelViewSet):
     queryset = models.Follow.objects.all()
     serializer_class = serializers.FollowSerializer
     permission_classes = [permissions.IsAuthenticated]
+
+    def perform_create(self, serializer):
+        serializer.save(follower=self.request.user)
 
 
 class MessageViewSet(viewsets.ModelViewSet):
