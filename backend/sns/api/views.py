@@ -3,6 +3,7 @@ from django.contrib.auth import authenticate, login, logout
 from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
 from rest_framework.decorators import action
+from django.db.models import F
 
 from . import models, serializers
 
@@ -88,6 +89,28 @@ class FollowViewSet(viewsets.ModelViewSet):
         followers = models.Follow.objects.filter(followed=user)
         serializer = self.get_serializer(followers, many=True)
         return Response(serializer.data)
+
+    def list(self, request, *args, **kwargs):
+        # 各 'followed' ユーザーに対して一意のレコードを取得
+        queryset = self.filter_queryset(self.get_queryset()).annotate(
+            followed_user=F('followed')).values('followed_user').distinct()
+
+        # カスタムレスポンスの作成
+        custom_response = []
+        for item in queryset:
+            followed_user = models.CustomUser.objects.get(
+                pk=item['followed_user'])
+            followers_data = self.get_followers(followed_user)
+            custom_response.append({
+                'followed': followed_user.id,
+                'followers': followers_data
+            })
+
+        return Response(custom_response)
+
+    def get_followers(self, followed_user):
+        followers = models.Follow.objects.filter(followed=followed_user)
+        return [serializers.SimpleUserSerializer(follower.follower).data for follower in followers]
 
 
 class MessageViewSet(viewsets.ModelViewSet):

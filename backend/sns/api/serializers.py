@@ -43,15 +43,46 @@ class LikeSerializer(serializers.ModelSerializer):
         return instance
 
 
+class SimpleUserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.CustomUser
+        fields = ['id', 'username']
+
+
 class FollowSerializer(serializers.ModelSerializer):
-    follower = UserSerializer(read_only=True)
-    followed = serializers.PrimaryKeyRelatedField(
-        queryset=models.CustomUser.objects.all()
-    )
+    followers = serializers.SerializerMethodField()
 
     class Meta:
         model = models.Follow
-        fields = ['id', 'follower', 'followed', 'created_at']
+        fields = ['followed', 'followers']
+
+    def get_followers(self, obj):
+        # obj は Follow モデルのインスタンス
+        followers = models.Follow.objects.filter(followed=obj.followed)
+        return [SimpleUserSerializer(follower.follower).data for follower in followers]
+
+    def validate(self, data):
+        follower = self.context['request'].user
+        followed = data.get('followed')
+
+        if follower == followed:
+            raise serializers.ValidationError("Cannot follow yourself.")
+
+        if models.Follow.objects.filter(follower=follower, followed=followed).exists():
+            raise serializers.ValidationError(
+                "You are already following this user.")
+
+        return data
+
+# class FollowSerializer(serializers.ModelSerializer):
+#     follower = UserSerializer(read_only=True)
+#     followed = serializers.PrimaryKeyRelatedField(
+#         queryset=models.CustomUser.objects.all()
+#     )
+
+#     class Meta:
+#         model = models.Follow
+#         fields = ['id', 'follower', 'followed', 'created_at']
 
 
 class MessageSerializer(serializers.ModelSerializer):

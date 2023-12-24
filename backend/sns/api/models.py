@@ -2,6 +2,7 @@ from django.db import models
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.models import User
+from django.core.exceptions import ValidationError
 
 
 def upload_path(instance, filename):
@@ -47,6 +48,14 @@ class Follow(models.Model):
 
     class Meta:
         unique_together = ('follower', 'followed')
+
+    def clean(self):
+        if self.follower == self.followed:
+            raise ValidationError("Cannot follow yourself.")
+
+    def save(self, *args, **kwargs):
+        self.clean()
+        super(Follow, self).save(*args, **kwargs)
 
 
 class Message(models.Model):
