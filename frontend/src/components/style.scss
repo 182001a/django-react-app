@@ -104,7 +104,7 @@
   }
 
   &__image {
-    max-width: 100%;
+    max-width: 60%;
     height: auto;
     margin-top: 1rem;
   }
@@ -118,4 +118,12 @@
   flex: 3;
   background-color: rgba(0, 0, 255, 0.007);
   padding: 20px;
+}
+
+.like {
+
+  &__image {
+    width: 100%;
+    height: auto;
+  }
 }

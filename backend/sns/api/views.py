@@ -2,6 +2,7 @@ from rest_framework import viewsets, status, generics, response, permissions
 from django.contrib.auth import authenticate, login, logout
 from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
+from rest_framework.decorators import action
 
 from . import models, serializers
 
@@ -80,6 +81,13 @@ class FollowViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(follower=self.request.user)
+
+    @action(detail=True, methods=['get'])
+    def list_followers(self, request, pk=None):
+        user = self.get_object()
+        followers = models.Follow.objects.filter(followed=user)
+        serializer = self.get_serializer(followers, many=True)
+        return Response(serializer.data)
 
 
 class MessageViewSet(viewsets.ModelViewSet):

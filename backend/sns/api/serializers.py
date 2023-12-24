@@ -25,12 +25,12 @@ class PostSerializer(serializers.ModelSerializer):
 
 
 class LikeSerializer(serializers.ModelSerializer):
-    post_detail = PostSerializer(source='post', read_only=True)
     user = serializers.PrimaryKeyRelatedField(read_only=True)
+    post = PostSerializer(read_only=True)
 
     class Meta:
         model = models.Like
-        fields = ['id', 'user', 'post', 'post_detail']
+        fields = ['id', 'user', 'post', 'created_at']
 
     def create(self, validated_data):
         user = self.context['request'].user
@@ -44,10 +44,14 @@ class LikeSerializer(serializers.ModelSerializer):
 
 
 class FollowSerializer(serializers.ModelSerializer):
+    follower = UserSerializer(read_only=True)
+    followed = serializers.PrimaryKeyRelatedField(
+        queryset=models.CustomUser.objects.all()
+    )
+
     class Meta:
         model = models.Follow
-        fields = ['id', 'follower', 'followed']
-        read_only_fields = ('follower',)
+        fields = ['id', 'follower', 'followed', 'created_at']
 
 
 class MessageSerializer(serializers.ModelSerializer):

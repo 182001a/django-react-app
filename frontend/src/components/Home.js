@@ -73,7 +73,7 @@ function Home({ cookies }) {
     }
   };
 
-  console.log(posts)
+  // console.log(posts)
   
   return (
     <div className="container">
@@ -101,8 +101,8 @@ function Home({ cookies }) {
           <ul className="like__list">
             {likedPosts.map((like) => (
               <React.Fragment key={like.id}>
-                <li className="like__content">{like.post_detail.content}</li>
-                <li className="like__file">{like.post_detail.file}</li>
+                <li className="like__content">{like.post.content}</li>
+                <li className="like__file">{like.post.file && <img src={like.post.file} className="like__image" />}</li>
               </React.Fragment>
             ))}
           </ul>

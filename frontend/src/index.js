@@ -8,6 +8,7 @@ import Home from './components/Home';
 import Navbar from "./components/Navbar";
 import { AppProvider } from './AppContext';
 import './index.scss';
+import Follow from "./components/Follow";
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 
@@ -21,6 +22,7 @@ root.render(
           <Route path="/signup" element={<Signup />} />
           <Route path="/login" element={<Login />} />
           <Route path="/logout" element={<Logout />} />
+          <Route path="/following" element={<Follow />} />
         </Routes>
       </Router>
     </AppProvider>
