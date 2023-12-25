@@ -7,7 +7,7 @@ from django.core.exceptions import ValidationError
 
 def upload_path(instance, filename):
     ext = filename.split('.')[-1]
-    return '/'.join(['files', str(instance.author.id)+str(".")+str(ext)])
+    return '/'.join(['files', filename + str(".") + str(ext)])
 
 
 class CustomUser(AbstractUser):
@@ -26,6 +26,15 @@ class Post(models.Model):
 
     def __str__(self):
         return self.content
+
+    def save(self, *args, **kwargs):
+        if self.file:  # ファイルフィールドが存在する場合のみチェック
+            # 同じファイル名のレコードが存在するかチェック
+            if Post.objects.filter(file=self.file.name).exclude(id=self.id).exists():
+                raise ValidationError(
+                    "A file with the same name already exists.")
+
+        super().save(*args, **kwargs)
 
 
 class Like(models.Model):
