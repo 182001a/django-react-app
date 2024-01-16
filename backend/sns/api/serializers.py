@@ -25,8 +25,13 @@ class PostSerializer(serializers.ModelSerializer):
 
 
 class LikeSerializer(serializers.ModelSerializer):
+    # userフィールドは引き続き読み取り専用です。
     user = serializers.PrimaryKeyRelatedField(read_only=True)
-    post = PostSerializer(read_only=True)
+
+    # postフィールドをPrimaryKeyRelatedFieldとして定義し、書き込みを許可します。
+    post = serializers.PrimaryKeyRelatedField(
+        queryset=models.Post.objects.all()
+    )
 
     class Meta:
         model = models.Like
@@ -34,13 +39,9 @@ class LikeSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         user = self.context['request'].user
-        like = models.Like.objects.create(user=user, **validated_data)
+        like, created = models.Like.objects.get_or_create(
+            user=user, **validated_data)
         return like
-
-    def update(self, instance, validated_data):
-        instance.post = validated_data.get('post', instance.post)
-        instance.save()
-        return instance
 
 
 class SimpleUserSerializer(serializers.ModelSerializer):
